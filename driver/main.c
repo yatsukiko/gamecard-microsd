@@ -51,6 +51,7 @@
 #include <taihen.h>
 
 #define MOUNT_POINT_ID 0x800
+#define MOUNT_POINT_ID2 0xF00
 
 int module_get_offset(SceUID pid, SceUID modid, int segidx, size_t offset, uintptr_t *addr);
 
@@ -80,6 +81,7 @@ typedef struct {
 } SceIoMountPoint;
 
 static SceIoDevice uma_ux0_dev = { "ux0:", "exfatux0", "sdstor0:gcd-lp-ign-entire", "sdstor0:gcd-lp-ign-entire", MOUNT_POINT_ID };
+static SceIoDevice uma_uma0_dev = { "uma0:", "exfatuma0", "sdstor0:xmc-lp-ign-userext", "sdstor0:xmc-lp-ign-userext", MOUNT_POINT_ID2 };
 
 static SceIoMountPoint *(* sceIoFindMountPoint)(int id) = NULL;
 
@@ -88,6 +90,10 @@ static SceIoDevice *ori_dev = NULL, *ori_dev2 = NULL;
 static void io_remount(int id) {
 	ksceIoUmount(id, 0, 0, 0);
 	ksceIoUmount(id, 1, 0, 0);
+	ksceIoMount(id, NULL, 0, 0, 0, 0);
+}
+
+static void io_mount(int id) {
 	ksceIoMount(id, NULL, 0, 0, 0, 0);
 }
 
@@ -117,6 +123,23 @@ int shellKernelRedirectUx0() {
 
 	mount->dev = &uma_ux0_dev;
 	mount->dev2 = &uma_ux0_dev;
+
+	return 0;
+}
+
+int shellKernelRedirectUma0() {
+	SceIoMountPoint *mount = sceIoFindMountPoint(MOUNT_POINT_ID2);
+	if (!mount) {
+		return -1;
+	}
+
+	if (mount->dev != &uma_uma0_dev && mount->dev2 != &uma_uma0_dev) {
+		ori_dev = mount->dev;
+		ori_dev2 = mount->dev2;
+	}
+
+	mount->dev = &uma_uma0_dev;
+	mount->dev2 = &uma_uma0_dev;
 
 	return 0;
 }
@@ -164,6 +187,8 @@ int redirect_ux0() {
 
 	shellKernelRedirectUx0();
 	io_remount(MOUNT_POINT_ID);
+	shellKernelRedirectUma0();
+    	io_mount(MOUNT_POINT_ID2);
 
 	return 0;
 }
