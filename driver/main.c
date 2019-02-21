@@ -52,6 +52,7 @@
 
 #define MOUNT_POINT_ID 0x800
 #define MOUNT_POINT_ID2 0xF00
+#define MOUNT_POINT_ID3 0xD00
 
 int module_get_offset(SceUID pid, SceUID modid, int segidx, size_t offset, uintptr_t *addr);
 
@@ -82,6 +83,7 @@ typedef struct {
 
 static SceIoDevice uma_ux0_dev = { "ux0:", "exfatux0", "sdstor0:gcd-lp-ign-entire", "sdstor0:gcd-lp-ign-entire", MOUNT_POINT_ID };
 static SceIoDevice uma_uma0_dev = { "uma0:", "exfatuma0", "sdstor0:xmc-lp-ign-userext", "sdstor0:xmc-lp-ign-userext", MOUNT_POINT_ID2 };
+static SceIoDevice uma_imc0_dev = { "imc0:", "exfatimc0", "sdstor0:int-lp-ign-userext", "sdstor0:int-lp-ign-userext", MOUNT_POINT_ID3 };
 
 static SceIoMountPoint *(* sceIoFindMountPoint)(int id) = NULL;
 
@@ -188,7 +190,8 @@ int redirect_ux0() {
 	shellKernelRedirectUx0();
 	io_remount(MOUNT_POINT_ID);
 	shellKernelRedirectUma0();
-    	io_mount(MOUNT_POINT_ID2);
+    io_mount(MOUNT_POINT_ID2);
+    io_mount(MOUNT_POINT_ID3);
 
 	return 0;
 }
