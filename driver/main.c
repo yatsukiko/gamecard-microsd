@@ -181,6 +181,10 @@ int redirect_ux0() {
 		case 0x90DA33DE: // 3.68 retail
 			module_get_offset(KERNEL_PID, info.modid, 0, 0x182F5, (uintptr_t *)&sceIoFindMountPoint);
 			break;
+		case 0xF16E72C7: // 3.69 retail
+		case 0x81A49C2B: // 3.70 retail
+			module_get_offset(KERNEL_PID, info.modid, 0, 0x18735, (uintptr_t *)&sceIoFindMountPoint);
+			break;
 
 		default:
 			return -1;
@@ -289,6 +293,11 @@ void patch_appmgr() {
 			case 0xC3C538DE: // 3.68 retail
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB344, &nop_nop_opcode, 4);
 				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB374, &nop_nop_opcode, 2);
+				break;
+			case 0x321E4852: // 3.69 retail
+			case 0x700DA0CD: // 3.70 retail
+				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB34C, &nop_nop_opcode, 4);
+				taiInjectDataForKernel(KERNEL_PID, appmgr_info.modid, 0, 0xB37C, &nop_nop_opcode, 2);
 				break;
 		}
 	}
